@@ -1,0 +1,39 @@
+:root {
+  --font-family: 'Vazirmatn';
+  --second-c: #0041a4 !important;
+  --main-c: #0052d0 !important;
+  --white-c: white !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url(/public/font/Vazirmatn-Regular.ttf);
+}
+
+html {
+  font-family: var(--font-family);
+  margin: 0%;
+  height: 100vh;
+  background-color: var(--main-c);
+}
+
+body {
+  margin: 0%;
+}
+
+
+@media (max-width: 500px) {
+  .WeatherCard {
+    width: 350px;
+  }
+  .cloud {
+    margin: 0px !important;
+  }
+  .cloud .cloudIcon {
+    font-size: 132px !important;
+  }
+}
