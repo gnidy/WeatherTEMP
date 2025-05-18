@@ -6,53 +6,48 @@ import Container from '@mui/material/Container';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 import CloudIcon from '@mui/icons-material/Cloud';
 import LanguagetMenu from './component/changeLanguage';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 
-
-
+// redux import
+import { useDispatch, useSelector } from 'react-redux';
+import { ChangeWeatherAPI } from './features/API-Weather/API-Weather-Slice';
+import { FetchWeatherAPI } from './features/API-Weather/API-Weather-Slice';
 
 function App() {
-  const [weatherData, setWeatherData] = useState({max: 0, min: 0, temp: 0 , des: '', icon: null , date: 0});
+
+  // const [weatherData, setWeatherData] = useState({max: 0, min: 0, temp: 0 , des: '', icon: null , date: 0});
   const { t, i18n } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState('ar'); // Default language
 
+  // redux code
+  const dispatch = useDispatch();
+  
+  useEffect(() => { 
+    // dispatch(ChangeWeatherAPI());
+    dispatch(FetchWeatherAPI());
+    console.log("fetchResultAPI");
+  },[] );
+  
+  const isloading = useSelector((state) => {
+    return state.ChangeWeatherAPI.isloading
+  });
+
+  const weatherData = useSelector((state) => {
+    console.log(state.ChangeWeatherAPI.weatherData);
+    return state.ChangeWeatherAPI.weatherData;
+  });
 
 
   const handleLanguageChange = (lang) => {
     i18n.changeLanguage(lang);
     setSelectedLanguage(lang);
   }
-
   
-  useEffect(() => {
-    const lat = 30.033333; // Latitude for Cairo
-    const lon = 31.233334; // Longitude for Cairo
-    const apiKey = 'type the key here from openWeather'; // Replace with your OpenWeatherMap API key
 
-  axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`)
-    .then(function (response) {
-      // handle success
-      // console.log(response.data);
-      setWeatherData((el) => ({
-        ...el,
-        temp: response.data.main.temp,
-        max: response.data.main.temp_max,
-        min: response.data.main.temp_min,
-        des: response.data.weather[0].description,
-        icon: response.data.weather[0].icon,
-      }));
-    }).catch(function (error) {
-      // handle error
-      console.error(error);
-    });
-        setWeatherData((el) => ({
-      ...el,
-      date: new Intl.DateTimeFormat(`${i18n.language}-EG`, { dateStyle: 'long' }).format(new Date()),
-    })); 
-  }, [i18n.language]);
   return (
     <>
       <Container maxWidth="sm">
@@ -65,19 +60,22 @@ function App() {
                     {t('Cairo')}
                   </Typography>
                   <Typography gutterBottom variant="div" sx={{ marginTop: 'auto' }}>
-                    {weatherData.date}
+                    {new Intl.DateTimeFormat(`${i18n.language}-EG`, { dateStyle: 'long' }).format(new Date())}
                   </Typography>
                 </div>
                 <hr style={{margin: '0'}} />
                 <div style={{display: 'flex' , flexDirection: `${selectedLanguage == 'ar' ? 'row-reverse' : 'row'}` , justifyContent: 'space-between'}} >
                   {/* TEMP */}
                   <div style={{display: 'flex', flexDirection: 'column' , alignItems: `${selectedLanguage == 'ar' ? 'end' : 'start'}` , justifyContent:'space-around' ,marginTop: '15px'}} >
-                    <div style={{display: 'flex', flexDirection: `${selectedLanguage == 'ar' ? 'row-reverse' : 'row'}`, justifyContent:'space-around'}}>
+                      {isloading && (<CircularProgress 
+                        style={{ color: 'var(--white-c)' }}
+                      />)}
+                    <div style={{display: !isloading ? 'flex':'none', flexDirection: `${selectedLanguage == 'ar' ? 'row-reverse' : 'row'}`, justifyContent:'space-around'}}>
                       <Typography variant="h2">
                         {t(Math.round(weatherData.temp))}°
                       </Typography>
                       <Typography  sx={{marginBottom: '-40px' }}>
-                        <img src={`https://openweathermap.org/img/wn/${weatherData.icon}@2x.png` } alt="weather icon" />
+                        <img src={`https://openweathermap.org/img/wn/${weatherData.icon}@2x.png` }/>
                       </Typography>
                     </div>
                     <Typography variant="h6">
@@ -85,12 +83,12 @@ function App() {
                     </Typography>
                     {/* number of TEMP MIN & MAX */}
                     <div style={{    display: "flex",flexDirection: `${selectedLanguage == 'ar' ? 'row-reverse' : 'row'}`,justifyContent: "space-between",minWidth: "175px"}}>
-                      <div>
-                        {t('min')} : {t(Math.round(weatherData.min))}
+                      <div style={{display: "flex",flexDirection: 'row' ,gap: '10px'}}>
+                        {t('min')} : {isloading && (<CircularProgress style={{ color: 'var(--white-c)' }} size={15}/>)} <span style={{display: !isloading ? 'flex':'none'}}>{t(Math.round(weatherData.min))}</span>
                       </div>
-                      |
-                      <div>
-                        {t('max')} : {t(Math.round(weatherData.max))}
+                      <span style={{padding: "0 8px"}}>|</span>
+                      <div style={{display: "flex",flexDirection: 'row' ,gap: '10px'}}>
+                        {t('max')} : {isloading && (<CircularProgress style={{ color: 'var(--white-c)' }} size={15}/>)} <span style={{display: !isloading ? 'flex':'none'}}>{t(Math.round(weatherData.max))}</span>
                       </div>
                     </div>
                   </div>
